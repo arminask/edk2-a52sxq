@@ -74,6 +74,12 @@ APRIORI DXE {
   INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
   INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
 
+  FILE DRIVER = f10f76db-42c1-533f-34a8-69be24653110 {
+    SECTION DXE_DEPEX = Platform/EFI_Binaries/Drivers/sdm660/SdccDxe/SdccDxe.depex
+    SECTION PE32 = Platform/EFI_Binaries/Drivers/sdm660/SdccDxe/SdccDxe.efi
+    SECTION UI = "SdccDxe"
+  }
+
   FILE DRIVER = 0d35cd8e-97ea-4f9a-96af-0f0d89f76567 {
     SECTION DXE_DEPEX = Platform/EFI_Binaries/Drivers/sdm660/UFSDxe/UFSDxe.depex
     SECTION PE32 = Platform/EFI_Binaries/Drivers/sdm660/UFSDxe/UFSDxe.efi
@@ -119,11 +125,11 @@ APRIORI DXE {
     SECTION UI = "I2C"
   }
 
-  FILE DRIVER = 5776232e-082d-4b75-9a0e-fe1d13f7a5d9 {
-    SECTION DXE_DEPEX = Platform/EFI_Binaries/Drivers/sdm660/PmicDxe/PmicDxe.depex
-    SECTION PE32 = Platform/EFI_Binaries/Drivers/sdm660/PmicDxe/PmicDxe.efi
-    SECTION UI = "PmicDxe"
-  }
+  #FILE DRIVER = 5776232e-082d-4b75-9a0e-fe1d13f7a5d9 {
+  #  SECTION DXE_DEPEX = Platform/EFI_Binaries/Drivers/sdm660/PmicDxe/PmicDxe.depex
+  #  SECTION PE32 = Platform/EFI_Binaries/Drivers/sdm660/PmicDxe/PmicDxe.efi
+  #  SECTION UI = "PmicDxe"
+  #}
 
   INF EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf

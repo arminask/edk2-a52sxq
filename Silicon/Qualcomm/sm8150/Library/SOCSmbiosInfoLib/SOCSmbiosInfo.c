@@ -172,10 +172,10 @@ SMBIOS_TABLE_TYPE4 mProcessorInfoType4_a55 = {
     0,                  // ThreadCount2;
 };
 
-CHAR8 mCpuName[128] = "Qualcomm Snapdragon 855";
+CHAR8 mCpuName[128] = "Qualcomm Snapdragon SM8150";
 
 CHAR8 *mProcessorInfoType4Strings[] = {
-    "BGA", "Qualcomm", "Snapdragon 855", NULL};
+    "BGA", "Qualcomm", "Snapdragon SM8150", NULL};
 
 /***********************************************************************
         SMBIOS data definition  TYPE7  Cache Information
@@ -541,6 +541,10 @@ VOID RegisterSOCSmbiosInfo(
       mCacheInfoType7Strings, &SmbiosHandle);
   mProcessorInfoType4_a55.L2CacheHandle = (UINT16)SmbiosHandle;
 
+  // Update string table before proceeds
+  mProcessorInfoType4Strings[2] =
+      (CHAR8 *)FixedPcdGetPtr(PcdSmbiosProcessorModel);
+      
   // TYPE4 Processor Information
   LogSmbiosData(
       (EFI_SMBIOS_TABLE_HEADER *)&mProcessorInfoType4_a76_big,
