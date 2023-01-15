@@ -3,7 +3,9 @@
 ## Problems
 
 Doesn't boot, shows this error:
-![banner_wide_dark](https://raw.githubusercontent.com/arminask/edk2-a52sxq/master/error.png)
+
+![Error](error.png)
+
 
 Probably memory map is incorrect, location of the file that possibly needs modifying:
 ```
