@@ -9,7 +9,6 @@
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = Platform/Qualcomm/sm8150/sm8150.fdf
   DEVICE_DXE_FV_COMPONENTS       = Platform/Oneplus/sm8150/guacamole.fdf.inc
-  # DEFINE AB_SLOTS_SUPPORT        = TRUE
 
 !include Platform/Qualcomm/sm8150/sm8150.dsc
 

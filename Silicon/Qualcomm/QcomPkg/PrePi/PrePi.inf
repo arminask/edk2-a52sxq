@@ -17,6 +17,7 @@
 
 [Sources.common]
   Pi.c
+  LinuxUtils.c
 
 [Sources.AARCH64]
   ModuleEntryPoint.S | GCC
@@ -47,6 +48,7 @@
   PlatformPrePiLib
   PrePiHobListPointerLib
   PrePiLib
+  UfdtLib
 
 [Guids]
   gEfiSystemNvDataFvGuid
@@ -71,3 +73,4 @@
   gQcomTokenSpaceGuid.PcdUefiMemPoolBase
   gQcomTokenSpaceGuid.PcdUefiMemPoolSize
   gSimpleInitTokenSpaceGuid.PcdDeviceTreeStore
+  gQcomTokenSpaceGuid.PcdLinuxUtilsCheckHallOnly

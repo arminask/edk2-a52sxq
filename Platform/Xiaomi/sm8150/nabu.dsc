@@ -9,7 +9,9 @@
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = Platform/Qualcomm/sm8150/sm8150.fdf
   DEVICE_DXE_FV_COMPONENTS       = Platform/Xiaomi/sm8150/nabu.fdf.inc
-  DEFINE AB_SLOTS_SUPPORT        = FALSE
+  
+  # Enable A/B Slot Environment
+  AB_SLOTS_SUPPORT               = FALSE
 
 !include Platform/Qualcomm/sm8150/sm8150.dsc
 
@@ -28,3 +30,6 @@
   gRenegadePkgTokenSpaceGuid.PcdDeviceCodeName|"nabu"
 
   gsm8150PkgTokenSpaceGuid.PcdSmbiosProcessorModel|"Snapdragon (TM) 860 @ 2.96 GHz"
+
+  gQcomTokenSpaceGuid.PcdHallSensorPin|9
+  gQcomTokenSpaceGuid.PcdHallSensorActiveLow|TRUE
