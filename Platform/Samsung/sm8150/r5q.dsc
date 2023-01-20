@@ -1,5 +1,5 @@
 [Defines]
-  PLATFORM_NAME                  = dumpling
+  PLATFORM_NAME                  = r5q
   PLATFORM_GUID                  = 28f1a3bf-193a-47e3-a7b9-5a435eaab2ee
   PLATFORM_VERSION               = 0.1
   DSC_SPECIFICATION              = 0x00010019
@@ -7,21 +7,23 @@
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = Platform/Qualcomm/msm8998/msm8998.fdf
-  DEVICE_DXE_FV_COMPONENTS       = Platform/Oneplus/msm8998/dumpling.fdf.inc
+  FLASH_DEFINITION               = Platform/Qualcomm/sm8150/sm8150.fdf
+  DEVICE_DXE_FV_COMPONENTS       = Platform/Samsung/sm8150/r5q.fdf.inc
 
-!include Platform/Qualcomm/msm8998/msm8998.dsc
+!include Platform/Qualcomm/sm8150/sm8150.dsc
 
 [BuildOptions.common]
   GCC:*_*_AARCH64_CC_FLAGS = -DENABLE_SIMPLE_INIT -DENABLE_LINUX_SIMPLE_MASS_STORAGE
 
 [PcdsFixedAtBuild.common]
+
   gQcomTokenSpaceGuid.PcdMipiFrameBufferWidth|1080
-  gQcomTokenSpaceGuid.PcdMipiFrameBufferHeight|2160
+  gQcomTokenSpaceGuid.PcdMipiFrameBufferHeight|2400
+  gQcomTokenSpaceGuid.PcdMipiFrameBufferAddress|0x9c400000
 
   # Simple Init
-  gSimpleInitTokenSpaceGuid.PcdGuiDefaultDPI|300
+  gSimpleInitTokenSpaceGuid.PcdGuiDefaultDPI|394
 
-  gRenegadePkgTokenSpaceGuid.PcdDeviceVendor|"Oneplus"
-  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"5T"
-  gRenegadePkgTokenSpaceGuid.PcdDeviceCodeName|"dumpling"
+  gRenegadePkgTokenSpaceGuid.PcdDeviceVendor|"Samsung"
+  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"Galaxy S10 Lite"
+  gRenegadePkgTokenSpaceGuid.PcdDeviceCodeName|"r5q"
