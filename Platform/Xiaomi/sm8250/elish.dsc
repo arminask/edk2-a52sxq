@@ -1,4 +1,5 @@
 [Defines]
+  VENDOR_NAME                    = Xiaomi
   PLATFORM_NAME                  = elish
   PLATFORM_GUID                  = 28f1a3bf-193a-47e3-a7b9-5a435eaab2ee
   PLATFORM_VERSION               = 0.1
@@ -13,7 +14,7 @@
 !include Platform/Qualcomm/sm8250/sm8250.dsc
 
 [BuildOptions.common]
-  GCC:*_*_AARCH64_CC_FLAGS = -DMEMMAP_XIAOMI_HACKS -DENABLE_SIMPLE_INIT -DENABLE_LINUX_SIMPLE_MASS_STORAGE
+  GCC:*_*_AARCH64_CC_FLAGS = -DENABLE_SIMPLE_INIT
 
 [PcdsFixedAtBuild.common]
   gQcomTokenSpaceGuid.PcdMipiFrameBufferWidth|1600

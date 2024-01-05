@@ -1,4 +1,5 @@
 [Defines]
+  VENDOR_NAME                    = LG
   PLATFORM_NAME                  = betalm
   PLATFORM_GUID                  = 28f1a3bf-193a-47e3-a7b9-5a435eaab2ee
   PLATFORM_VERSION               = 0.1
@@ -24,7 +25,7 @@
   gSimpleInitTokenSpaceGuid.PcdGuiDefaultDPI|355
 
   gRenegadePkgTokenSpaceGuid.PcdDeviceVendor|"LG"
-  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"G8S"
+  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"G8S ThinQ"
   gRenegadePkgTokenSpaceGuid.PcdDeviceCodeName|"betalm"
 
   # Synaptics Touchscren

@@ -13,13 +13,14 @@ function _help(){
 	echo "	--toolchain TOOLCHAIN:   Set toolchain, default is 'CLANG38'."
 	echo "	--uart, -u:              compile with UART support, print debug messages to uart debug port."
 	echo " 	--skip-rootfs-gen:       skip generating SimpleInit rootfs to speed up building."
-	echo " 	--no-exception-disp:     do not display exception information in DEBUG builds"
-	echo "	--acpi, -A:              compile DSDT using MS asl with wine"
+	echo " 	--no-exception-disp:     do not display exception information in DEBUG builds."
+	echo "	--acpi, -A:              compile DSDT using MS asl with wine."
 	echo "	--clean, -C:             clean workspace and output."
 	echo "	--distclean, -D:         clean up all files that are not in repo."
 	echo "	--outputdir, -O:         output folder."
 	echo "	--boot, -b:              fastboot boot image."
 	echo "	--fixclang, -f:          fix build using Clang by suppressing -Os flag."
+	echo "	--installer-zip, -z:     generate flashable installer zip."
 	echo "	--help, -h:              show this help."
 	echo
 	echo "MainPage: https://github.com/edk2-porting/edk2-msm"
@@ -66,6 +67,11 @@ function _build(){
 	# for overriding config
 	source "configs/devices/${DEVICE}.conf"
 
+	if "${GEN_INSTALLER_ZIP}"
+	then
+		export ENABLE_LINUX_UTILS=1
+	fi
+
 	_load_platform_hooks Platform/platform.sh.inc
 	_load_platform_hooks Silicon/platform.sh.inc
 	_load_platform_hooks "Silicon/${SOC_VENDOR}/platform.sh.inc"
@@ -111,14 +117,12 @@ function _build(){
 
 	echo "Building BootShim"
 	pushd "${ROOTDIR}/tools/BootShim"
-	rm -f BootShim.bin BootShim.elf Padding.bin
+	rm -f BootShim.bin BootShim.elf BootShim.Dualboot.bin BootShim.Dualboot.elf
 	make UEFI_BASE=${FD_BASE} UEFI_SIZE=${FD_SIZE}
-	bootshimsize=$(stat -c %s "BootShim.bin")
-	# padding for 2M alignment for Linux kernel appended
-	head -c `expr 2097152 - $bootshimsize` /dev/zero > Padding.bin
 	popd
 
 	_call_hook platform_pre_build||return "$?"
+	mkdir -p "${ROOTDIR}/Common/edk2/Conf"
 	cp "${ROOTDIR}/tools/"{build_rule.txt,tools_def.txt} "${ROOTDIR}/Common/edk2/Conf/"
 	build \
 		-s \
@@ -137,10 +141,23 @@ function _build(){
 	_call_hook platform_build_kernel||return "$?"
 	_call_hook platform_build_bootimg||return "$?"
 	echo "Build done: ${OUTDIR}/boot-${DEVICE}${EXT}.img"
+
+	if "${GEN_INSTALLER_ZIP}"
+	then
+		cp "${WORKSPACE}/Build/${DEVICE}/${_MODE}_${TOOLCHAIN}/FV/${SOC_PLATFORM}_UEFI.fd" "${ROOTDIR}/tools/Installer/${DEVICE}_UEFI.fd"
+		cp "${ROOTDIR}/tools/BootShim/BootShim.Dualboot.bin" "${ROOTDIR}/tools/Installer/BootShim.Dualboot.bin"
+		pushd "${ROOTDIR}/tools/Installer/"
+		./pack.sh
+		popd
+		mv "${ROOTDIR}/tools/Installer/installer.zip" "${OUTDIR}/uefi-installer-${DEVICE}${EXT}.zip"
+		rm -f "${ROOTDIR}/tools/Installer/${DEVICE}_UEFI.fd"
+		rm -f "${ROOTDIR}/tools/Installer/BootShim.Dualboot.bin"
+		echo "Pack done: ${OUTDIR}/uefi-installer-${DEVICE}${EXT}.zip"
+	fi
 	set +x
 }
 
-function _clean(){ rm --one-file-system --recursive --force "${WORKSPACE}"./workspace "${OUTDIR}"/boot-*.img "${OUTDIR}"/uefi-*.img*; }
+function _clean(){ rm --one-file-system --recursive --force "${WORKSPACE}"./workspace "${OUTDIR}"/boot-*.img "${OUTDIR}"/uefi-installer-*.zip "${OUTDIR}"/uefi-*.img*; }
 
 function _distclean(){ if [ -d .git ];then git clean -xdf;else _clean;fi; }
 
@@ -156,15 +173,15 @@ CLEAN=false
 DISTCLEAN=false
 TOOLCHAIN=CLANG38
 export FIX_CLANG=0
-export ENABLE_LINUX_UTILS=0
 SOC_VENDOR=Qualcomm
 USE_UART=0
 NO_EXCEPTION_DISPLAY=0
 export ROOTDIR OUTDIR SOC_VENDOR
 export GEN_ACPI=false
 export GEN_ROOTFS=true
+export GEN_INSTALLER_ZIP=false
 export FASTBOOT=false
-OPTS="$(getopt -o t:d:hfabcACDO:r:u -l toolchain:,device:,help,fixclang,all,boot,chinese,acpi,skip-rootfs-gen,no-exception-disp,uart,clean,distclean,outputdir:,release: -n 'build.sh' -- "$@")"||exit 1
+OPTS="$(getopt -o t:d:hfabczACDO:r:u -l toolchain:,device:,help,fixclang,all,boot,chinese,acpi,skip-rootfs-gen,no-exception-disp,installer-zip,uart,clean,distclean,outputdir:,release: -n 'build.sh' -- "$@")"||exit 1
 eval set -- "${OPTS}"
 while true
 do	case "${1}" in
@@ -182,6 +199,7 @@ do	case "${1}" in
 		-t|--toolchain) TOOLCHAIN="${2}";shift 2;;
 		-u|--uart) USE_UART=1;shift;;
 		-f|--fixclang) FIX_CLANG=1;shift;;
+		-z|--installer-zip) GEN_INSTALLER_ZIP=true;ENABLE_LINUX_UTILS=1;shift;;
 		-h|--help) _help 0;shift;;
 		--) shift;break;;
 		*) _help 1;;
@@ -196,36 +214,43 @@ then
 	echo "Updating submodules"
 	if "${CHINESE}"
 	then
-		git submodule set-url Common/edk2                                           https://hub.nuaa.cf/tianocore/edk2.git
-		git submodule set-url Common/edk2-platforms                                 https://hub.nuaa.cf/tianocore/edk2-platforms.git
-		git submodule set-url Platform/EFI_Binaries                                 https://hub.nuaa.cf/edk2-porting/edk2-sdm845-binary.git
-		git submodule set-url GPLDrivers/Library/SimpleInit               			https://hub.nuaa.cf/BigfootACA/simple-init.git
+		vim -u NONE -N .gitmodules -c "%s/github.com/hub.nuaa.cf/g" -c ":wq"
 		git submodule init;git submodule update --depth 1
 		pushd Common/edk2
-
-		git submodule set-url ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3   https://hub.nuaa.cf/ucb-bar/berkeley-softfloat-3.git
-		git submodule set-url CryptoPkg/Library/OpensslLib/openssl                  https://hub.nuaa.cf/openssl/openssl.git
-		git submodule set-url BaseTools/Source/C/BrotliCompress/brotli              https://hub.nuaa.cf/google/brotli.git
-		git submodule set-url UnitTestFrameworkPkg/Library/CmockaLib/cmocka         https://hub.nuaa.cf/tianocore/edk2-cmocka.git
-		git submodule set-url ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3   https://hub.nuaa.cf/ucb-bar/berkeley-softfloat-3.git
-		git submodule set-url MdeModulePkg/Library/BrotliCustomDecompressLib/brotli https://hub.nuaa.cf/google/brotli.git
-		git submodule set-url MdeModulePkg/Universal/RegularExpressionDxe/oniguruma https://hub.nuaa.cf/kkos/oniguruma.git
-		git submodule set-url RedfishPkg/Library/JsonLib/jansson                    https://hub.nuaa.cf/akheron/jansson.git
+		vim -u NONE -N .gitmodules -c "%s/github.com/hub.nuaa.cf/g" -c ":wq"
+		git submodule init;git submodule update
+		pushd CryptoPkg/Library/OpensslLib/openssl
+		git submodule set-url boringssl https://hub.nuaa.cf/google/boringssl
+		vim -u NONE -N .gitmodules -c "%s/github.com/hub.nuaa.cf/g" -c ":wq"
+		git submodule init;git submodule update
+		git checkout .gitmodules
+		popd
+		git checkout .gitmodules
+		popd
+		pushd Common/edk2-platforms
+		vim -u NONE -N .gitmodules -c "%s/github.com/hub.nuaa.cf/g" -c ":wq"
 		git submodule init;git submodule update
 		git checkout .gitmodules
 		popd
 		pushd GPLDrivers/Library/SimpleInit
-		git submodule set-url libs/lvgl     https://hub.nuaa.cf/lvgl/lvgl.git
 		git submodule set-url libs/freetype https://hub.nuaa.cf/freetype/freetype.git
+		vim -u NONE -N .gitmodules -c "%s/github.com/hub.nuaa.cf/g" -c ":wq"
 		git submodule init;git submodule update
 		popd
 		git checkout .gitmodules
+		git submodule init;git submodule update --recursive
 	else
 		git submodule init;git submodule update --depth 1
 		pushd Common/edk2
 		git submodule init;git submodule update
 		popd
+		pushd Common/edk2-platforms
+		git submodule init;git submodule update
+		popd
 		pushd GPLDrivers/Library/SimpleInit
+		git submodule init;git submodule update
+		popd
+		pushd tools/Installer
 		git submodule init;git submodule update
 		popd
 	fi

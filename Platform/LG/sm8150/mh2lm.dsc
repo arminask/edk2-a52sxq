@@ -1,4 +1,5 @@
 [Defines]
+  VENDOR_NAME                    = LG
   PLATFORM_NAME                  = mh2lm
   PLATFORM_GUID                  = 28f1a3bf-193a-47e3-a7b9-5a435eaab2ee
   PLATFORM_VERSION               = 0.1
@@ -24,7 +25,7 @@
   gSimpleInitTokenSpaceGuid.PcdGuiDefaultDPI|355
 
   gRenegadePkgTokenSpaceGuid.PcdDeviceVendor|"LG"
-  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"G8X"
+  gRenegadePkgTokenSpaceGuid.PcdDeviceProduct|"G8X ThinQ"
   gRenegadePkgTokenSpaceGuid.PcdDeviceCodeName|"mh2lm"
 
   # Synaptics Touchscren

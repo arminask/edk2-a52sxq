@@ -4,14 +4,6 @@ function platform_build_kernel(){
 		"${WORKSPACE}/Build/${DEVICE}/${_MODE}_${TOOLCHAIN}/FV/${SOC_PLATFORM}_UEFI.fd" \
 		> "${WORKSPACE}/Build/${DEVICE}/${_MODE}_${TOOLCHAIN}/FV/${SOC_PLATFORM}_UEFI.fd-bootshim" \
 		||return "$?"
-	if [ 1 = ${ENABLE_LINUX_UTILS} ]
-	then
-		cat \
-			"${WORKSPACE}/Build/${DEVICE}/${_MODE}_${TOOLCHAIN}/FV/${SOC_PLATFORM}_UEFI.fd-bootshim" \
-			"${ROOTDIR}/tools/BootShim/Padding.bin" \
-			> "${OUTDIR}/${DEVICE}_UEFI-Padding.fd" \
-			||return "$?"
-	fi
 	gzip -c \
 		< "${WORKSPACE}/Build/${DEVICE}/${_MODE}_${TOOLCHAIN}/FV/${SOC_PLATFORM}_UEFI.fd-bootshim" \
 		> "${WORKSPACE}/uefi-${DEVICE}.img.gz" \
@@ -25,7 +17,7 @@ function platform_build_kernel(){
 }
 
 function platform_build_bootimg(){
-	python3 "${ROOTDIR}/tools/mkbootimg.py" \
+		python3 "${ROOTDIR}/tools/mkbootimg.py" \
 		--kernel "${WORKSPACE}/uefi-${DEVICE}-kernel" \
 		--ramdisk ramdisk \
 		--kernel_offset 0x00000000 \
@@ -33,7 +25,7 @@ function platform_build_bootimg(){
 		--tags_offset 0x00000000 \
 		--os_version "${BOOTIMG_OS_VERSION}" \
 		--os_patch_level "${BOOTIMG_OS_PATCH_LEVEL}" \
-		--header_version 1 \
+		--header_version "${BOOTIMG_HEADER_VERSION}" \
 		-o "${OUTDIR}/boot-${DEVICE}${EXT}.img" \
 		||return "$?"
 }
